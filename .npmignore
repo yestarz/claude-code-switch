@@ -1,0 +1,17 @@
+# 仅发布必要文件
+node_modules/
+src/
+tests/
+*.ts
+!*.d.ts
+tsconfig.json
+.eslintrc*
+.prettierrc
+.gitignore
+.git/
+.vscode/
+.idea/
+*.log
+*.tmp
+.env*
+.DS_Store

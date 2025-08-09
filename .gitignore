@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.log
+*.tmp
+.env
+.env.local
+.DS_Store
+coverage/
+.nyc_output/
+*.tsbuildinfo
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.npmrc
