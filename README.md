@@ -15,7 +15,7 @@
 ## 安装
 
 ```bash
-npm install -g @dingpx/claude-code-switch
+npm install -g @yestarz/claude-code-switch
 ```
 
 ## 使用方法
