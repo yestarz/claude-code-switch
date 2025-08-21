@@ -5,6 +5,7 @@ import { listCommand } from './commands/list';
 import { openCommand } from './commands/open';
 import { switchCommand } from './commands/switch';
 import { currentCommand } from './commands/current';
+import { uiCommand } from './commands/ui';
 import chalk from 'chalk';
 
 const program = new Command();
@@ -47,6 +48,14 @@ program
   .description('显示当前使用的配置')
   .action(async () => {
     await currentCommand();
+  });
+
+// ui 命令 - 打开 Web UI 界面
+program
+  .command('ui')
+  .description('打开 Web UI 配置管理界面')
+  .action(async () => {
+    await uiCommand();
   });
 
 // 默认命令 - 显示帮助
