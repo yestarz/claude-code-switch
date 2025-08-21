@@ -1,4 +1,4 @@
-# Claude Code Switch (CCS) v2.3
+# Claude Code Switch (CCS) v2.4.0
 
 一个简洁的 Claude Code 配置管理工具，用于管理和切换多个配置文件。
 
@@ -237,7 +237,7 @@ MIT
 
 ## 更新日志
 
-### v2.3.0 🚀
+### v2.4.0 🚀
 - **新增 Web UI 界面** - 使用 `ccs ui` 启动炫酷的图形化管理界面
 - **集成 Monaco 编辑器** - VS Code 级别的 JSON 编辑体验
 - **专业编辑工具** - 格式化、语法验证、代码折叠功能
