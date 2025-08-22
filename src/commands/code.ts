@@ -2,6 +2,7 @@ import { ProjectStore } from '../core/ProjectStore';
 import { Logger } from '../utils/logger';
 import inquirer from 'inquirer';
 import { exec } from 'child_process';
+import { platform } from 'os';
 
 export async function codeCommand(): Promise<void> {
   const projectStore = new ProjectStore();
@@ -36,11 +37,27 @@ export async function codeCommand(): Promise<void> {
     Logger.info(`正在启动项目 "${projectName}"...`);
     Logger.info(`项目路径: ${project.path}`);
     
-    // 使用 start cmd.exe 在新窗口中打开项目目录并启动 Claude
-    // 这样可以在新的终端窗口中保持正确的工作目录
-    exec(`start cmd.exe /k "cd /d "${project.path}" && echo 当前目录: %cd% && echo 正在启动 Claude... && claude"`, (error) => {
+    const currentPlatform = platform();
+    let command: string;
+    
+    if (currentPlatform === 'win32') {
+      // Windows 平台
+      command = `start cmd.exe /k "cd /d "${project.path}" && echo 当前目录: %cd% && echo 正在启动 Claude... && claude"`;
+    } else if (currentPlatform === 'darwin') {
+      // macOS 平台
+      command = `osascript -e 'tell app "Terminal" to do script "cd \\"${project.path}\\" && echo 当前目录: \\$(pwd) && echo 正在启动 Claude... && claude"'`;
+    } else {
+      // Linux 和其他 Unix-like 平台
+      command = `gnome-terminal -- bash -c "cd '${project.path}' && echo 当前目录: \\$(pwd) && echo 正在启动 Claude... && claude; exec bash" || \
+xterm -e "cd '${project.path}' && echo 当前目录: \\$(pwd) && echo 正在启动 Claude... && claude" || \
+konsole -e "cd '${project.path}' && echo 当前目录: \\$(pwd) && echo 正在启动 Claude... && claude"`;
+    }
+    
+    exec(command, (error) => {
       if (error) {
         Logger.error(`启动失败: ${error.message}`);
+        Logger.info('请手动在终端中执行以下命令：');
+        Logger.info(`cd "${project.path}" && claude`);
         process.exit(1);
       }
     });
