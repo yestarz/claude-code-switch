@@ -37,49 +37,24 @@ export async function codeCommand(): Promise<void> {
     Logger.info(`正在启动项目 "${projectName}"...`);
     Logger.info(`项目路径: ${project.path}`);
     
-    const currentPlatform = platform();
-    let command: string;
+    // 直接切换到目标目录并启动 Claude
+    process.chdir(project.path);
     
-    if (currentPlatform === 'win32') {
-      // Windows 平台
-      command = `start cmd.exe /k "cd /d "${project.path}" && echo 当前目录: %cd% && echo 正在启动 Claude... && claude"`;
-    } else if (currentPlatform === 'darwin') {
-      // macOS 平台
-      command = `osascript -e 'tell app "Terminal" to do script "cd \\"${project.path}\\" && echo 当前目录: \\$(pwd) && echo 正在启动 Claude... && claude"'`;
-    } else {
-      // Linux 和其他 Unix-like 平台
-      // 首先尝试检测可用的终端
-      const terminals = [
-        { name: 'gnome-terminal', cmd: 'gnome-terminal -- bash -c "{command}; exec bash"' },
-        { name: 'xterm', cmd: 'xterm -e "{command}"' },
-        { name: 'konsole', cmd: 'konsole -e "{command}"' },
-        { name: 'xfce4-terminal', cmd: 'xfce4-terminal -e "{command}"' },
-        { name: 'mate-terminal', cmd: 'mate-terminal -e "{command}"' },
-        { name: 'lxterminal', cmd: 'lxterminal -e "{command}"' },
-      ];
-      
-      const shellCommand = `cd '${project.path}' && echo 当前目录: \\$(pwd) && echo 正在启动 Claude... && claude`;
-      
-      // 尝试使用默认终端，如果失败则提供手动执行方案
-      command = `which gnome-terminal > /dev/null 2>&1 && gnome-terminal -- bash -c "${shellCommand}; exec bash" || \
-which xterm > /dev/null 2>&1 && xterm -e "${shellCommand}" || \
-which konsole > /dev/null 2>&1 && konsole -e "${shellCommand}" || \
-which xfce4-terminal > /dev/null 2>&1 && xfce4-terminal -e "${shellCommand}" || \
-which mate-terminal > /dev/null 2>&1 && mate-terminal -e "${shellCommand}" || \
-which lxterminal > /dev/null 2>&1 && lxterminal -e "${shellCommand}" || \
-(echo "未找到支持的终端模拟器" && false)`;
-    }
+    Logger.info(`已切换到项目目录: ${process.cwd()}`);
+    Logger.info('正在启动 Claude...');
     
-    exec(command, (error) => {
-      if (error) {
-        Logger.error(`启动失败: ${error.message}`);
-        Logger.info('请手动在终端中执行以下命令：');
-        Logger.info(`cd "${project.path}" && claude`);
-        process.exit(1);
-      }
+    // 使用 spawn 启动 Claude，这样会替换当前进程
+    const { spawn } = require('child_process');
+    const claude = spawn('claude', [], { 
+      stdio: 'inherit',
+      shell: true
     });
     
-    Logger.info('已在新窗口中启动 Claude，当前窗口将保持不变');
+    claude.on('error', (error: any) => {
+      Logger.error(`启动 Claude 失败: ${error.message}`);
+      Logger.info('请确保已正确安装 Claude CLI 工具');
+      process.exit(1);
+    });
     
   } catch (error) {
     Logger.stopSpinner();
