@@ -652,10 +652,18 @@
                 require(['vs/editor/editor.main'], function () {
                     monacoEditor = monaco.editor.create(document.getElementById('monacoEditor'), {
                         value: JSON.stringify({
-                            env: {
-                                ANTHROPIC_AUTH_TOKEN: "your-api-key"
+                            "env": {
+                                "ANTHROPIC_AUTH_TOKEN": "",
+                                "ANTHROPIC_BASE_URL": "",
+                                "API_TIMEOUT_MS": "600000",
+                                "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+                                "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "32000"
                             },
-                            model: "sonnet"
+                            "model": "",
+                            "permissions": {
+                                "allow": [],
+                                "deny": []
+                            }
                         }, null, 2),
                         language: 'json',
                         theme: 'vs-dark',
