@@ -857,19 +857,24 @@
             document.getElementById('profileKey').value = key;
             document.getElementById('profileKey').disabled = true;
             
-            // 设置 Monaco Editor 内容
+            // 设置配置内容到隐藏的 textarea
             const profileData = JSON.stringify(profiles[key], null, 2);
-            if (monacoEditor) {
-                monacoEditor.setValue(profileData);
-            } else {
-                document.getElementById('profileData').value = profileData;
-            }
+            document.getElementById('profileData').value = profileData;
             
             document.getElementById('editModal').style.display = 'block';
             
-            // 如果 Monaco Editor 还没初始化，先初始化
+            // 如果 Monaco Editor 还没初始化，先初始化，并在初始化完成后设置内容
             if (!monacoEditor) {
                 initMonacoEditor();
+                // 延迟设置内容，确保编辑器初始化完成
+                setTimeout(() => {
+                    if (monacoEditor) {
+                        monacoEditor.setValue(profileData);
+                    }
+                }, 100);
+            } else {
+                // 编辑器已初始化，直接设置内容
+                monacoEditor.setValue(profileData);
             }
         }
         
@@ -886,17 +891,23 @@
                 model: "sonnet"
             }, null, 2);
             
-            if (monacoEditor) {
-                monacoEditor.setValue(defaultProfile);
-            } else {
-                document.getElementById('profileData').value = defaultProfile;
-            }
+            // 设置默认内容到隐藏的 textarea
+            document.getElementById('profileData').value = defaultProfile;
             
             document.getElementById('editModal').style.display = 'block';
             
-            // 如果 Monaco Editor 还没初始化，先初始化
+            // 如果 Monaco Editor 还没初始化，先初始化，并在初始化完成后设置内容
             if (!monacoEditor) {
                 initMonacoEditor();
+                // 延迟设置内容，确保编辑器初始化完成
+                setTimeout(() => {
+                    if (monacoEditor) {
+                        monacoEditor.setValue(defaultProfile);
+                    }
+                }, 100);
+            } else {
+                // 编辑器已初始化，直接设置内容
+                monacoEditor.setValue(defaultProfile);
             }
         }
         

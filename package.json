@@ -1,6 +1,6 @@
 {
   "name": "@yestarz/claude-code-switch",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "Claude Code 配置管理工具 - 简单的配置查看和编辑",
   "main": "dist/index.js",
   "bin": {
