@@ -1,4 +1,4 @@
-# Claude Code Switch (CCS) v2.6.0
+# Claude Code Switch (CCS) v2.6.1
 
 一个简洁的 Claude Code 配置管理工具，用于管理和切换多个配置文件。
 
@@ -249,7 +249,7 @@ MIT
 
 ## 更新日志
 
-### v2.6.0 🚀
+### v2.6.1 🚀
 - **新增项目管理功能** - 支持管理多个项目路径
 - **新增项目命令组** - `ccs project` 相关命令：
   - `ccs project list/ls` - 查看所有项目
