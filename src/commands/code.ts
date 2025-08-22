@@ -48,9 +48,26 @@ export async function codeCommand(): Promise<void> {
       command = `osascript -e 'tell app "Terminal" to do script "cd \\"${project.path}\\" && echo 当前目录: \\$(pwd) && echo 正在启动 Claude... && claude"'`;
     } else {
       // Linux 和其他 Unix-like 平台
-      command = `gnome-terminal -- bash -c "cd '${project.path}' && echo 当前目录: \\$(pwd) && echo 正在启动 Claude... && claude; exec bash" || \
-xterm -e "cd '${project.path}' && echo 当前目录: \\$(pwd) && echo 正在启动 Claude... && claude" || \
-konsole -e "cd '${project.path}' && echo 当前目录: \\$(pwd) && echo 正在启动 Claude... && claude"`;
+      // 首先尝试检测可用的终端
+      const terminals = [
+        { name: 'gnome-terminal', cmd: 'gnome-terminal -- bash -c "{command}; exec bash"' },
+        { name: 'xterm', cmd: 'xterm -e "{command}"' },
+        { name: 'konsole', cmd: 'konsole -e "{command}"' },
+        { name: 'xfce4-terminal', cmd: 'xfce4-terminal -e "{command}"' },
+        { name: 'mate-terminal', cmd: 'mate-terminal -e "{command}"' },
+        { name: 'lxterminal', cmd: 'lxterminal -e "{command}"' },
+      ];
+      
+      const shellCommand = `cd '${project.path}' && echo 当前目录: \\$(pwd) && echo 正在启动 Claude... && claude`;
+      
+      // 尝试使用默认终端，如果失败则提供手动执行方案
+      command = `which gnome-terminal > /dev/null 2>&1 && gnome-terminal -- bash -c "${shellCommand}; exec bash" || \
+which xterm > /dev/null 2>&1 && xterm -e "${shellCommand}" || \
+which konsole > /dev/null 2>&1 && konsole -e "${shellCommand}" || \
+which xfce4-terminal > /dev/null 2>&1 && xfce4-terminal -e "${shellCommand}" || \
+which mate-terminal > /dev/null 2>&1 && mate-terminal -e "${shellCommand}" || \
+which lxterminal > /dev/null 2>&1 && lxterminal -e "${shellCommand}" || \
+(echo "未找到支持的终端模拟器" && false)`;
     }
     
     exec(command, (error) => {
