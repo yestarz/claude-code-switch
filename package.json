@@ -1,7 +1,7 @@
 {
   "name": "@yestarz/claude-code-switch",
-  "version": "2.5.1",
-  "description": "Claude Code 配置管理工具 - 简单的配置查看和编辑，支持Web UI配置",
+  "version": "2.6.0",
+  "description": "Claude Code 配置管理工具 - 管理多个配置文件和项目，支持Web UI配置和快速启动",
   "main": "dist/index.js",
   "bin": {
     "ccs": "dist/cli.js"
@@ -17,7 +17,11 @@
     "config",
     "settings",
     "profile",
-    "manager"
+    "manager",
+    "project",
+    "workspace",
+    "switch",
+    "ui"
   ],
   "author": "yestarz",
   "license": "MIT",

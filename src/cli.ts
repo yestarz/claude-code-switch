@@ -6,14 +6,18 @@ import { openCommand } from './commands/open';
 import { switchCommand } from './commands/switch';
 import { currentCommand } from './commands/current';
 import { uiCommand } from './commands/ui';
+import { projectListCommand } from './commands/projectList';
+import { projectAddCommand } from './commands/projectAdd';
+import { projectRemoveCommand } from './commands/projectRemove';
+import { codeCommand } from './commands/code';
 import chalk from 'chalk';
 
 const program = new Command();
 
 program
   .name('ccs')
-  .description('Claude Code 配置管理工具 - 管理多个配置文件')
-  .version('2.5.1', '-v, --version', '显示版本号');
+  .description('Claude Code 配置管理工具 - 管理多个配置文件和项目')
+  .version('2.6.0', '-v, --version', '显示版本号');
 
 // list 命令 - 列出所有配置
 program
@@ -56,6 +60,45 @@ program
   .description('打开 Web UI 配置管理界面')
   .action(async () => {
     await uiCommand();
+  });
+
+// project 命令组
+const projectCommand = program
+  .command('project')
+  .description('项目管理相关命令');
+
+// project list 命令 - 列出所有项目
+projectCommand
+  .command('list')
+  .alias('ls')
+  .description('列出所有项目')
+  .action(async () => {
+    await projectListCommand();
+  });
+
+// project add 命令 - 添加项目
+projectCommand
+  .command('add')
+  .description('添加新项目')
+  .action(async () => {
+    await projectAddCommand();
+  });
+
+// project remove 命令 - 删除项目
+projectCommand
+  .command('remove')
+  .alias('rm')
+  .description('删除项目')
+  .action(async () => {
+    await projectRemoveCommand();
+  });
+
+// code 命令 - 选择项目并启动 Claude
+program
+  .command('code')
+  .description('选择项目并启动 Claude')
+  .action(async () => {
+    await codeCommand();
   });
 
 // 默认命令 - 显示帮助

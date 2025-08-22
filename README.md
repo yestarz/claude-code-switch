@@ -1,4 +1,4 @@
-# Claude Code Switch (CCS) v2.5.1
+# Claude Code Switch (CCS) v2.6.0
 
 一个简洁的 Claude Code 配置管理工具，用于管理和切换多个配置文件。
 
@@ -11,6 +11,8 @@
 - 🔑 **Key-Value 格式** - 易于理解和管理的 JSON 格式
 - 🎛️ **Web UI 界面** - 炫酷的图形化配置管理界面
 - ⚡ **Monaco 编辑器** - VS Code 级别的 JSON 编辑体验
+- 📁 **项目管理** - 管理多个项目路径，快速启动 Claude
+- 🚀 **快速启动** - 一键选择项目并在新窗口中启动 Claude
 
 ## 安装
 
@@ -223,6 +225,16 @@ ccs open
 
 # Web UI 界面
 ccs ui              # 启动图形化管理界面
+
+# 项目管理
+ccs project list    # 查看所有项目
+ccs project ls      # 查看所有项目（别名）
+ccs project add     # 添加新项目
+ccs project remove  # 删除项目
+ccs project rm      # 删除项目（别名）
+
+# 快速启动项目
+ccs code            # 选择项目并启动 Claude
 ```
 
 ## 注意事项
@@ -236,6 +248,16 @@ ccs ui              # 启动图形化管理界面
 MIT
 
 ## 更新日志
+
+### v2.6.0 🚀
+- **新增项目管理功能** - 支持管理多个项目路径
+- **新增项目命令组** - `ccs project` 相关命令：
+  - `ccs project list/ls` - 查看所有项目
+  - `ccs project add` - 添加新项目
+  - `ccs project remove/rm` - 删除项目
+- **新增快速启动功能** - `ccs code` 命令一键选择项目并在新窗口中启动 Claude
+- **优化启动体验** - 在新终端窗口中保持正确的工作目录
+- **增强 Logger 工具** - 添加颜色方法支持
 
 ### v2.5.1
 - **优化** -  在Web UI新增配置时，默认一些参数。

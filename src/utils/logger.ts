@@ -56,4 +56,12 @@ export class Logger {
       console.log(chalk.green('✔ 当前活跃配置'));
     }
   }
+
+  static cyan(text: string): string {
+    return chalk.cyan(text);
+  }
+
+  static dim(text: string): string {
+    return chalk.dim(text);
+  }
 }
