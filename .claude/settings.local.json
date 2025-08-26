@@ -5,7 +5,10 @@
       "Bash(rm:*)",
       "Bash(node:*)",
       "Bash(git push:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm publish:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
