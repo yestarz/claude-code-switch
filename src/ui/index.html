@@ -94,14 +94,29 @@
         .header h1 {
             font-size: 3rem;
             font-weight: 700;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .header h1 .emoji-icon {
+            font-size: 3rem;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            display: inline-block;
+        }
+        
+        .header h1 .title-text {
             background: linear-gradient(135deg, #6366f1, #f43f5e, #10b981);
             background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             animation: gradient-shift 4s ease-in-out infinite;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 1;
         }
         
         @keyframes gradient-shift {
@@ -550,6 +565,10 @@
                 font-size: 2rem;
             }
             
+            .header h1 .emoji-icon {
+                font-size: 2rem;
+            }
+            
             .profiles-container {
                 grid-template-columns: 1fr;
                 gap: 1.5rem;
@@ -574,7 +593,10 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎛️ Claude Code Switch</h1>
+            <h1>
+                <span class="emoji-icon">🤖</span>
+                <span class="title-text">Claude Code Switch</span>
+            </h1>
             <p>更直观的修改你的 Claude Code 配置</p>
             <div id="currentProfile" class="current-profile">
                 当前配置: <span id="currentName">加载中...</span>
@@ -639,59 +661,108 @@
         let currentProfile = '';
         let editingKey = null;
         let monacoEditor = null;
+        let monacoEditorReady = false;
+        let pendingContent = null;
         
         // 初始化 Monaco Editor
         async function initMonacoEditor() {
-            if (typeof require !== 'undefined') {
-                require.config({ 
-                    paths: { 
-                        vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' 
-                    } 
-                });
-                
-                require(['vs/editor/editor.main'], function () {
-                    monacoEditor = monaco.editor.create(document.getElementById('monacoEditor'), {
-                        value: JSON.stringify({
-                            "env": {
-                                "ANTHROPIC_AUTH_TOKEN": "",
-                                "ANTHROPIC_BASE_URL": "",
-                                "API_TIMEOUT_MS": "600000",
-                                "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-                                "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "32000"
-                            },
-                            "model": "",
-                            "permissions": {
-                                "allow": [],
-                                "deny": []
+            return new Promise((resolve, reject) => {
+                if (typeof require !== 'undefined') {
+                    require.config({ 
+                        paths: { 
+                            vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' 
+                        } 
+                    });
+                    
+                    require(['vs/editor/editor.main'], function () {
+                        monacoEditor = monaco.editor.create(document.getElementById('monacoEditor'), {
+                            value: JSON.stringify({
+                                "env": {
+                                    "ANTHROPIC_AUTH_TOKEN": "",
+                                    "ANTHROPIC_BASE_URL": "",
+                                    "API_TIMEOUT_MS": "600000",
+                                    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+                                    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "32000"
+                                },
+                                "model": "",
+                                "permissions": {
+                                    "allow": [],
+                                    "deny": []
+                                }
+                            }, null, 2),
+                            language: 'json',
+                            theme: 'vs-dark',
+                            automaticLayout: true,
+                            fontSize: 13,
+                            minimap: { enabled: false },
+                            scrollBeyondLastLine: false,
+                            formatOnPaste: true,
+                            formatOnType: true,
+                            wordWrap: 'on',
+                            folding: true,
+                            foldingStrategy: 'indentation',
+                            showFoldingControls: 'always',
+                            bracketPairColorization: {
+                                enabled: true
                             }
-                        }, null, 2),
-                        language: 'json',
-                        theme: 'vs-dark',
-                        automaticLayout: true,
-                        fontSize: 13,
-                        minimap: { enabled: false },
-                        scrollBeyondLastLine: false,
-                        formatOnPaste: true,
-                        formatOnType: true,
-                        wordWrap: 'on',
-                        folding: true,
-                        foldingStrategy: 'indentation',
-                        showFoldingControls: 'always',
-                        bracketPairColorization: {
-                            enabled: true
-                        }
-                    });
-                    
-                    // 监听内容变化
-                    monacoEditor.onDidChangeModelContent(() => {
+                        });
+                        
+                        // 监听内容变化
+                        monacoEditor.onDidChangeModelContent(() => {
+                            updateEditorStatus();
+                            syncTextarea();
+                        });
+                        
                         updateEditorStatus();
-                        syncTextarea();
+                        monacoEditorReady = true;
+                        
+                        // 如果有待设置的内容，现在设置
+                        if (pendingContent !== null) {
+                            monacoEditor.setValue(pendingContent);
+                            pendingContent = null;
+                        }
+                        
+                        resolve(monacoEditor);
                     });
-                    
-                    updateEditorStatus();
-                });
+                } else {
+                    console.error('Monaco Editor 加载失败');
+                    reject(new Error('Monaco Editor 加载失败'));
+                }
+            });
+        }
+        
+        // 安全地设置编辑器内容
+        async function setEditorContent(content) {
+            if (monacoEditorReady && monacoEditor) {
+                // 编辑器已准备好，直接设置
+                monacoEditor.setValue(content);
+            } else if (monacoEditor) {
+                // 编辑器存在但可能还没完全初始化，等待一下
+                pendingContent = content;
+                let retries = 0;
+                const maxRetries = 50; // 最多等待5秒
+                const checkReady = () => {
+                    if (monacoEditorReady && monacoEditor) {
+                        monacoEditor.setValue(content);
+                        pendingContent = null;
+                    } else if (retries < maxRetries) {
+                        retries++;
+                        setTimeout(checkReady, 100);
+                    } else {
+                        console.warn('Monaco Editor 初始化超时，使用 textarea 作为备选');
+                        document.getElementById('profileData').value = content;
+                    }
+                };
+                checkReady();
             } else {
-                console.error('Monaco Editor 加载失败');
+                // 编辑器还没开始创建，先保存内容
+                pendingContent = content;
+                try {
+                    await initMonacoEditor();
+                } catch (error) {
+                    console.warn('Monaco Editor 初始化失败，使用 textarea 作为备选:', error);
+                    document.getElementById('profileData').value = content;
+                }
             }
         }
         
@@ -859,7 +930,7 @@
             }
         }
         
-        function editProfile(key) {
+        async function editProfile(key) {
             editingKey = key;
             document.getElementById('modalTitle').textContent = '✏️ 编辑配置';
             document.getElementById('profileKey').value = key;
@@ -871,22 +942,11 @@
             
             document.getElementById('editModal').style.display = 'block';
             
-            // 如果 Monaco Editor 还没初始化，先初始化，并在初始化完成后设置内容
-            if (!monacoEditor) {
-                initMonacoEditor();
-                // 延迟设置内容，确保编辑器初始化完成
-                setTimeout(() => {
-                    if (monacoEditor) {
-                        monacoEditor.setValue(profileData);
-                    }
-                }, 100);
-            } else {
-                // 编辑器已初始化，直接设置内容
-                monacoEditor.setValue(profileData);
-            }
+            // 使用安全的内容设置方法
+            await setEditorContent(profileData);
         }
         
-        function openAddModal() {
+        async function openAddModal() {
             editingKey = null;
             document.getElementById('modalTitle').textContent = '✨ 添加新配置';
             document.getElementById('profileKey').value = '';
@@ -894,9 +954,17 @@
             
             const defaultProfile = JSON.stringify({
                 env: {
-                    ANTHROPIC_AUTH_TOKEN: "your-api-key"
+                    ANTHROPIC_AUTH_TOKEN: "",
+                    ANTHROPIC_BASE_URL: "",
+                    API_TIMEOUT_MS: "600000",
+                    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+                    CLAUDE_CODE_MAX_OUTPUT_TOKENS: "32000"
                 },
-                model: "sonnet"
+                model: "",
+                permissions: {
+                    allow: [],
+                    deny: []
+                }
             }, null, 2);
             
             // 设置默认内容到隐藏的 textarea
@@ -904,19 +972,8 @@
             
             document.getElementById('editModal').style.display = 'block';
             
-            // 如果 Monaco Editor 还没初始化，先初始化，并在初始化完成后设置内容
-            if (!monacoEditor) {
-                initMonacoEditor();
-                // 延迟设置内容，确保编辑器初始化完成
-                setTimeout(() => {
-                    if (monacoEditor) {
-                        monacoEditor.setValue(defaultProfile);
-                    }
-                }, 100);
-            } else {
-                // 编辑器已初始化，直接设置内容
-                monacoEditor.setValue(defaultProfile);
-            }
+            // 使用安全的内容设置方法
+            await setEditorContent(defaultProfile);
         }
         
         function closeModal() {
