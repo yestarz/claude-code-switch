@@ -9,6 +9,7 @@ import { uiCommand } from './commands/ui';
 import { projectListCommand } from './commands/projectList';
 import { projectAddCommand } from './commands/projectAdd';
 import { projectRemoveCommand } from './commands/projectRemove';
+import { projectCdCommand } from './commands/projectCd';
 import { codeCommand } from './commands/code';
 import chalk from 'chalk';
 
@@ -91,6 +92,14 @@ projectCommand
   .description('删除项目')
   .action(async () => {
     await projectRemoveCommand();
+  });
+
+// project cd 命令 - 切换到项目目录
+projectCommand
+  .command('cd')
+  .description('选择项目并切换到项目目录')
+  .action(async () => {
+    await projectCdCommand();
   });
 
 // code 命令 - 选择项目并启动 Claude

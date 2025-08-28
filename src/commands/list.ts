@@ -12,6 +12,7 @@ export async function listCommand(): Promise<void> {
       Logger.info('没有找到配置');
       Logger.info(`配置文件位置: ${store.getSettingsPath()}`);
       Logger.info('使用 "ccs open" 打开配置文件进行编辑');
+      Logger.info('使用 "ccs ui" 打开Web UI进行编辑');
       return;
     }
     
