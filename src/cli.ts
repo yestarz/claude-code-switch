@@ -18,7 +18,7 @@ const program = new Command();
 program
   .name('ccs')
   .description('Claude Code 配置管理工具 - 管理多个配置文件和项目')
-  .version('2.7.1', '-v, --version', '显示版本号');
+  .version('2.8.0', '-v, --version', '显示版本号');
 
 // list 命令 - 列出所有配置
 program
